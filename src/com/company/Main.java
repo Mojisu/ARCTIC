@@ -29,7 +29,7 @@ public class Main {
     public static void main(String[] args) throws IOException {
         // Scanner sc = new Scanner(System.in);
 
-        File file = new File("C:\\Users\\MO\\IdeaProjects\\ARCTIC\\src\\input");
+        File file = new File("C:\\Users\\mowom\\IdeaProjects\\ARCTIC\\src\\input");
         Scanner sc = new Scanner(file);
 
         for(int T = sc.nextInt(); T > 0; T--) {
@@ -37,6 +37,7 @@ public class Main {
 
             /* construct graph data structure */
             LinkedList<Gnode>[] L;
+            LinkedList<Double> Weights = new LinkedList<>();
             L = new LinkedList[N];
             Gnode[] V = new Gnode[N];
 
@@ -47,6 +48,7 @@ public class Main {
                 L[i].push(V[i]);
             }
 
+            Weights.add(0.0);
             for(int i = 0; i < N; i++) {
                 for(int j = 0; j < N; j++) {
                     if(i == j)
@@ -54,19 +56,56 @@ public class Main {
                     Gnode temp = new Gnode(V[j].getV(), V[j].getX(), V[j].getY());
                     temp.setWeight(temp.calWeight(L[i].get(0)));
                     L[i].addLast(temp);
-                }
-            }
+                    /* insert the weight to the sorted weights */
+                    ListIterator<Double> itr = Weights.listIterator();
+                    int k = 0;
+                    while(true) {
+                        k++;
+                        double d = itr.next();
+                        if(d == 0) {
+                            Weights.remove(0);
+                            Weights.add(0, temp.getWeight());
+                            break;
+                        }
+                        else if (d > temp.getWeight()) {
+                            Weights.add(k-1, temp.getWeight());
+                            break;
+                        }
+                        else if (d == temp.getWeight()) {
+                            break;
+                        }
+                        else if (!itr.hasNext()) {
+                            Weights.addLast(temp.getWeight());
+                            break;
+                        }
+                    } // end sort
+                } // end for(j)
+            } //end for(i)
 
+            /*
+            ListIterator<Double> itrW = Weights.listIterator();
+            while(itrW.hasNext())
+                System.out.println(itrW.next());
+            */
+            double maxW = Weights.getLast();
             for(int i = 0; i < N; i++) {
                 ListIterator<Gnode> itr = L[i].listIterator();
                 itr.next();
+                int j = 0;
+                Gnode temp;
                 while(itr.hasNext()) {
-                    Gnode temp = itr.next();
-                    System.out.println(i + " " + temp.getV() + " (" + temp.getX() + ", " + temp.getY() + ") " + temp.getWeight());
+                    temp = itr.next();
+                    j++;
+                    if(temp.getWeight() == maxW) {
+                        L[i].remove(j);
+                        if(itr.hasPrevious())
+                            j--;
+                    }
                 }
-                System.out.println("\n");
+                System.out.println();
             }
-            System.out.println("\n");
+
+            System.out.println();
         } //end for(T)
     } // end main()
 } // end Main
