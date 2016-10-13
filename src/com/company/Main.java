@@ -9,6 +9,7 @@ class Gnode {
     private int v;  // vertex index
     private double w;    // weight
     private double x, y;    // coordinate
+    private static boolean[] visit;
 
     public Gnode(int i, double d1, double d2) {
         this.v = i;
@@ -19,17 +20,33 @@ class Gnode {
     public int getV() { return this.v; }
     public double getX() { return this.x; }
     public double getY() { return this.y; }
+
     public double getWeight() { return this.w; }
     public void setWeight(double d1) { this.w = d1; }
     public double calWeight(Gnode V) { return Math.sqrt(Math.pow(this.x - V.getX(), 2) + Math.pow(this.y - V.getY(), 2)); }
+
+    public static void initVisit(int N) { visit = new boolean[N]; }
+    public static boolean getVisit(int v) { return visit[v]; }
+    public static void setVisit(int v) { visit[v] = true; }
 }
 
 public class Main {
 
+    public static void dfs(LinkedList<Gnode> L[], int v) {
+        ListIterator<Gnode> itr = L[v].listIterator();
+        Gnode.setVisit(v);
+        Gnode cur;
+        while(itr.hasNext()) {
+            cur = itr.next();
+            if(Gnode.getVisit(cur.getV()) == false)
+                dfs(L, cur.getV());
+        }
+    }
+
     public static void main(String[] args) throws IOException {
         // Scanner sc = new Scanner(System.in);
 
-        File file = new File("C:\\Users\\mowom\\IdeaProjects\\ARCTIC\\src\\input");
+        File file = new File("C:\\Users\\MO\\IdeaProjects\\ARCTIC\\src\\input");
         Scanner sc = new Scanner(file);
 
         for(int T = sc.nextInt(); T > 0; T--) {
@@ -82,30 +99,42 @@ public class Main {
                 } // end for(j)
             } //end for(i)
 
-            /*
             ListIterator<Double> itrW = Weights.listIterator();
+            boolean flag = false;
             while(itrW.hasNext())
-                System.out.println(itrW.next());
-            */
-            double maxW = Weights.getLast();
-            for(int i = 0; i < N; i++) {
-                ListIterator<Gnode> itr = L[i].listIterator();
-                itr.next();
-                int j = 0;
-                Gnode temp;
-                while(itr.hasNext()) {
-                    temp = itr.next();
-                    j++;
-                    if(temp.getWeight() == maxW) {
-                        L[i].remove(j);
-                        if(itr.hasPrevious())
+                itrW.next();
+
+            while(true) {
+                Double maxW = itrW.previous();
+
+                for (int i = 0; i < N; i++) {
+                    ListIterator<Gnode> itr = L[i].listIterator();
+                    itr.next();
+                    int j = 0;
+                    Gnode temp;
+                    while (itr.hasNext()) {
+                        temp = itr.next();
+                        j++;
+                        if (temp.getWeight() == maxW) {
+                            itr.remove();
                             j--;
+                        }
                     }
                 }
-                System.out.println();
-            }
+                // check if connected (DFS)
+                Gnode.initVisit(N);
+                dfs(L, 0);
 
-            System.out.println();
+                int i;
+                for(i = 0; i < N; i++)
+                    if(Gnode.getVisit(i) == false)
+                        break;
+
+                if(i != N) {
+                    System.out.println(itrW.next());    // print max weight
+                    break;
+                }
+            }
         } //end for(T)
     } // end main()
 } // end Main
